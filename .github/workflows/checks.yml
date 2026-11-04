@@ -52,12 +52,12 @@ jobs:
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
 
+      # Arch hat kein texlive-most mehr (es war ein Pflichter-Set); wir nehmen die
+      # einzelnen Pakete, die wir für das Heft brauchen: Kern + LaTeX + Japanisch +
+      # Schriften (PT Sans als OFL-Substitution, Noto für die Kanji).
       - name: Install LuaLaTeX and Python
         run: |
           pacman -Syu --noconfirm --needed git python python-yaml \
-            # Arch hat kein texlive-most mehr (es war ein Pflichter-Set); wir nehmen die
-            # einzelnen Pakete, die wir für das Heft brauchen: Kern + LaTeX + Japanisch +
-            # Schriften (PT Sans als OFL-Substitution, Noto für die Kanji).
             texlive-basic texlive-bin texlive-latex texlive-latexextra \
             texlive-fontsrecommended texlive-fontsextra texlive-fontutils \
             texlive-langjapanese
