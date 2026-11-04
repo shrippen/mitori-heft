@@ -63,10 +63,21 @@ jobs:
             texlive-langjapanese
 
       # The mitori-daten submodule at the root has the data, the tools and the
-      # Shinki style. checkout v7 with recursive pulls it.
+      # Shinki style. actions/checkout cannot pull from git.arianw.de on GitHub's runner
+      # (no credentials for Gitea); clone it manually with the configured GITEA_TOKEN.
       - uses: actions/checkout@v7
-        with:
-          submodules: recursive
+
+      - name: Clone mitori-daten submodule
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          # Pin the URL with the Gitea token so the submodule clone authenticates.
+          git config --global url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf "https://git.arianw.de/"
+          git submodule update --init --force --depth=1 --recursive
+          # Drop the credential from the working config so flat tests don't see it.
+          git config --local --unset url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf 2>/dev/null || true
 
       # The data the booklet sets lives in the submodule. Its own checks run
       # there as well — anything that breaks the data breaks the booklet
