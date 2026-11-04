@@ -1,7 +1,11 @@
 % Prüfungsprogramm Aikido Shinki Rengo · Daitoryu · Itto-den Shinki Toho
 %
 % Bauen: ./build.sh (Heft) bzw. ./build.sh entwurf (mit Fragen-Markern).
-% Alle Inhalte kommen aus ../daten/*.yaml (über tools/daten.py); gesetzt von lua/mitori-heft.lua.
+% Alle Inhalte kommen aus mitori-daten/daten/*.yaml (über tools/daten.py); gesetzt von lua/mitori-heft.lua.
+% MITORI_DATEN_DIR in der Umgebung überschreibt den Pfad zum Daten-Repo
+% (das Build-Skript setzt ihn auf das Submodul mitori-daten/).
+\providecommand{\mitoridaten}{../mitori-daten/}
+\providecommand{\mitoridaten}{\MITORI_DATEN_DIR}
 \documentclass[10pt]{article}
 \usepackage{stil/shinki}
 
@@ -35,7 +39,7 @@
 % Aikido -----------------------------------------------------------------------
 \teil{Aikido Shinki Rengo}{合気道}{Prüfungsprogramm Kyu- und Dan-Grade\\Stand 01.01.2022 · überarbeitet 2026}
 \textseite{Aikido Shinki Rengo · Prüfungsprogramm}{Vorbemerkung}{Vorbemerkung}
-{\fontsize{10.5}{14.5}\selectfont\setlength\parskip{2.5mm}\input{../daten/aikido-vorbemerkung.tex}\par}
+{\fontsize{10.5}{14.5}\selectfont\setlength\parskip{2.5mm}\input{\mitoridaten/daten/aikido-vorbemerkung.tex}\par}
 \inhalt{Grade \& Programm}\ansicht{grade-aikido}
 \inhalt{Kyu-Grade: ein Grad je Seite}\ansicht{tusche-aikido-1}
 \inhalt{Dan-Grade: ein Grad je Seite}\ansicht{tusche-aikido-2}

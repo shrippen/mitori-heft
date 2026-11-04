@@ -21,10 +21,14 @@ art="${1:-heft}"
 name=pruefungsprogramm
 optionen=""
 if [[ "$art" == entwurf ]]; then name=pruefungsprogramm-entwurf; optionen="\\def\\mitorientwurf{}"; fi
+# Submodul relativ zum Repo-Root (das Skript selbst lebt in heft/), bezogen auf das
+# compile-Verzeichnis, in dem latexmk läuft — es ist dasselbe heft/-Verzeichnis.
+daten_rel="../mitori-daten"
+[ -n "${MITORI_DATEN_DIR:-}" ] && daten_rel="${MITORI_DATEN_DIR}"
 
 python3 "$DATEN_DIR/tools/daten.py" --ausgabe build/daten
 mkdir -p build
 latexmk -lualatex -interaction=nonstopmode -halt-on-error -outdir=build -jobname="$name" \
-  -usepretex="$optionen" pruefungsprogramm.tex >/dev/null \
+  -usepretex="$optionen\\providecommand\\mitoridaten{$daten_rel/}" pruefungsprogramm.tex >/dev/null \
   || { grep -n -A8 '^!' "build/$name.log" | head -40; exit 1; }
 echo "build/$name.pdf"
