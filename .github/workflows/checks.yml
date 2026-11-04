@@ -1,0 +1,118 @@
+name: Checks
+
+# The checks of every commit:
+#   Daten im mitori-daten-Submodul: tools/daten.py + generierte YAMLs sind aktuell
+#   Heft baut: heft/build.sh → build/pruefungsprogramm.pdf (zwei PDFs: regulaer
+#     und der Entwurf mit Fragen-Marken, der sieht ob noch rote Marken drin sind)
+# LaTeX-Build mit Arch-Paketen ist der gleiche Container wie lokal.
+#
+# Not in this CI (runs only locally):
+#   - ein PDF-Build mit den Original-Videos (gibt es nicht im Repo, nur lokal
+#     unter ../Mitori Videos)
+#   - die Release-PDFs selbst, die an den Verband gehen — die entstehen im
+#     Mitori-App-CI und werden von dort aus hochgeladen (mitori-heft wird
+#     nicht in der App-Workflows referenziert).
+#
+# Arch Linux container: texlive-most bringt LuaLaTeX mit japanischen Fonts.
+
+# Public mirror: Gitea pushes every branch and tag here on each commit.
+# This runs the checks and reports them back to the commit on Gitea as
+# the status "github / test". There are no pull requests on GitHub, so
+# everything runs on push.
+#
+# Needs the secret GITEA_TOKEN: a Gitea token with write access to the
+# repository (commit statuses).
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+env:
+  GITEA_STATUS: https://git.arianw.de/api/v1/repos/shrippen/mitori-heft/statuses/${{ github.sha }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  test:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    timeout-minutes: 20
+    outputs:
+      started: ${{ steps.start.outputs.t }}
+    steps:
+      # A missing status is no reason to fail the checks.
+      - id: start
+        name: Report pending to Gitea
+        run: |
+          echo "t=$(date +%s)" >> "$GITHUB_OUTPUT"
+          curl -fsS -X POST "$GITEA_STATUS" \
+            -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"state\":\"pending\",\"context\":\"github / test\",\"description\":\"running\",\"target_url\":\"$RUN_URL\"}" \
+            || echo "::warning::Gitea status not reported"
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+
+      - name: Install LuaLaTeX and Python
+        run: |
+          pacman -Syu --noconfirm --needed git python python-yaml \
+            texlive-most texlive-langjapanese texlive-fontsextra
+
+      # The mitori-daten submodule at the root has the data, the tools and the
+      # Shinki style. checkout v7 with recursive pulls it.
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      # The data the booklet sets lives in the submodule. Its own checks run
+      # there as well — anything that breaks the data breaks the booklet
+      # build, so the surface belongs here too.
+      - name: Daten im Submodul
+        run: |
+          cd mitori-daten
+          python3 -m pytest -q tests
+          python3 tools/daten.py
+          # daten/shinki-toho-kommentare.yaml and daten/lexikon.yaml come from
+          # the PDFs in quellen/: a hand edit or a changed tool shows up here.
+          python3 tools/kommentare.py > /dev/null
+          python3 tools/lexikon.py > /dev/null
+          git diff --exit-code -- daten/
+
+      # The booklet without question markers (the published one). latexmk
+      # errors here mean the LaTeX or the data path is broken.
+      - name: Build the booklet
+        run: bash heft/build.sh
+
+      # The booklet with question markers (\\mitorientwurf{}, marks for open
+      # questions). A red mark in the output PDF means an open question in
+      # KORREKTUREN.md (status "klären") is still in the data — the booklet
+      # must wait until Sensei/Lehrer das klären.
+      - name: Build the draft (with question markers)
+        run: bash heft/build.sh entwurf
+
+  # Also runs when a check failed or was cancelled, so Gitea never keeps a
+  # stale "pending". Success only when all checks passed.
+  report:
+    needs: [test]
+    if: always()
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report result to Gitea
+        run: |
+          state=success
+          for r in $RESULTS; do
+            case "$r" in
+              success) ;;
+              failure) state=failure ;;
+              *) [ "$state" = failure ] || state=error ;;
+            esac
+          done
+          desc=$state
+          if [ -n "$STARTED" ]; then desc="$state in $(( ($(date +%s) - STARTED) / 60 )) min"; fi
+          curl -fsS -X POST "$GITEA_STATUS" \
+            -H "Authorization: token $GITEA_TOKEN" -H "Content-Type: application/json" \
+            -d "{\"state\":\"$state\",\"context\":\"github / test\",\"description\":\"$desc\",\"target_url\":\"$RUN_URL\"}"
+        env:
+          RESULTS: ${{ needs.test.result }}
+          STARTED: ${{ needs.test.outputs.started }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
