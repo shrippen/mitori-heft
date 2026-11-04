@@ -1,0 +1,10 @@
+# Daten, die tools/daten.py erzeugt — neu erzeugen, nicht einchecken.
+build/daten/
+
+# LaTeX-Bauausgabe.
+heft/build/
+
+# Vom Betriebssystem / Editoren.
+*~
+*.swp
+.DS_Store
