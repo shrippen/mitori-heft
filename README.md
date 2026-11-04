@@ -1,37 +1,36 @@
-# Mitori 見取り
+# Mitori-Heft — gedrucktes Prüfungsprogramm
 
-Prüfungsprogramme von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho: als Heft und als App
-für Android und Plasma Mobile. Technik antippen, die Stelle im Prüfungsvideo läuft, in Zeitlupe und
-als Schleife; danach abhaken und einschätzen.
-
-Die Videos sind nicht Teil dieses Repos. Sie gehören zu den DVDs des Shinkiryu-Verbands und werden
-in der App mit dem Code der DVD freigeschaltet.
+Das gedruckte Prüfungsprogramm von Aikido Shinki Rengo, Daitoryu und Itto-den Shinki Toho, gesetzt
+mit LuaLaTeX. Eine Quelle der Daten liegt im Schwester-Repo `mitori-daten` (Submodul).
 
 ## Aufbau
 
-| Ordner | Inhalt |
-|---|---|
-| `daten/` | die Programmdaten (YAML), eine Quelle für Heft und App |
-| `tools/` | `daten.py` prüft die Daten und erzeugt Heft- und App-Daten |
-| `heft/` | das Heft (LuaLaTeX) |
-| `app/` | die App (Qt 6, Kirigami, Design System Kante) |
-| `quellen/` | Prüfungsordnungen und Listen, aus denen die Daten stammen |
-| `entwuerfe/` | Konzept, Entscheidungen und Clickdummy der App |
-
-Plan: [ROADMAP.md](ROADMAP.md). Regeln für die Arbeit am Repo: [agent.md](agent.md).
+```
+heft/
+  pruefungsprogramm.tex     Hauptdokument
+  stil/shinki.sty           LaTeX-Stil (Shinki-Bibel im Daten-Repo)
+  texte/hinweise.tex        allgemeine Hinweise
+  grafik/shinki-logo.pdf    Titelgrafik
+  schriften/                PT Sans (OFL); lizenzierter Schriftsatz
+  lua/mitori-heft.lua       Renderer: liest die von daten.py erzeugten *.lua-Dateien
+  build.sh                  baut das Heft (lässt daten.py im Submodul laufen)
+mitori-daten/               Submodul (Pin auf einen Datentag)
+```
 
 ## Bauen
 
 ```sh
-./start.sh                             # App bauen (falls nötig) und starten, Videos aus ../Mitori Videos
-python3 tools/daten.py                 # Daten prüfen (braucht PyYAML)
-heft/build.sh                          # Heft → heft/build/
-cmake -S app -B build-app -G Ninja && cmake --build build-app && build-app/mitori
-scripts/check.sh                       # alle Prüfungen wie in der CI
-scripts/build-android.sh               # APK → dist/android/
+# Submodul initialisieren (einmal pro Klon):
+git submodule update --init
+
+# Heft bauen:
+./heft/build.sh                # → heft/build/pruefungsprogramm.pdf
+./heft/build.sh entwurf        # → heft/build/pruefungsprogramm-entwurf.pdf (mit Fragen-Markern)
 ```
+
+Voraussetzungen: LuaLaTeX (TeX Live), Python 3 mit PyYAML.
 
 ## Lizenz
 
-GPL-3.0-or-later. Die Texte in `quellen/` und die daraus übernommenen Kommentare gehören ihren
-Verfassern (Shinkiryu-Verband).
+GPL-3.0-or-later für den LaTeX-Code. Texte und Listen (`heft/texte/`, Daten aus `mitori-daten/daten/`)
+gehören ihren Verfassern (Shinkiryu-Verband).
