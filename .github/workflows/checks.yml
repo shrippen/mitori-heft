@@ -72,6 +72,9 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
           set -euo pipefail
+          # git on GitHub's runners refuses to operate on paths it can't prove are safe
+          # (dubious ownership); mark each expected workspace as safe first.
+          git config --global --add safe.directory '*'
           git submodule sync --recursive
           # Pin the URL with the Gitea token so the submodule clone authenticates.
           git config --global url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf "https://git.arianw.de/"
