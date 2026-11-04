@@ -59,7 +59,9 @@ jobs:
         run: |
           pacman -Syu --noconfirm --needed git python python-yaml python-pytest \
             poppler poppler-data \
-            texlive-basic texlive-bin texlive-latex texlive-latexextra \
+            # texlive-basic bringt lualatex, texlive-binextra das latexmk (das seit
+            # 2026 nicht mehr in texlive-bin steckt).
+            texlive-basic texlive-bin texlive-binextra texlive-latex texlive-latexextra \
             texlive-fontsrecommended texlive-fontsextra texlive-fontutils \
             texlive-langjapanese
 
