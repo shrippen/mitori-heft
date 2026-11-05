@@ -12,7 +12,7 @@ publish_output_progress = false
 enable_claude_adaptive_thinking = true
 reasoning_effort = "high"
 # The repository rules and the review guide go along as context.
-repo_context_files = ["agent.md"]
+repo_context_files = ["agent.md", "REVIEW.md"]
 
 [pr_reviewer]
 num_max_findings = 5
@@ -28,11 +28,11 @@ them as a careful second reader, not as their author.
 Report only findings that matter:
 - Bugs: a concrete input or state and the wrong result or crash it gives.
   Name file and line.
-- Wrong programme data: a technique, grade, order or video time that
-  differs from the sources in quellen/ or from daten/*.yaml.
+- Wrong programme in the booklet: a technique, grade or order that differs
+  from the pinned data (the data itself is reviewed in mitori-daten).
 - Leaks: videos, bundle keys or codes in the repository.
 - Missing tests for new behaviour.
-- Breaches of the repository rules (agent.md), the GUI rule included.
+- Breaches of the repository rules (agent.md).
 
 Label each finding **Wichtig** (must be fixed before the merge), **Kleinigkeit**
 or **Bestand** (was there before this PR) at the start of its title.

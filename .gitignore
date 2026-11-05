@@ -3,6 +3,9 @@
 *.mp4
 *.webm
 *.m4v
+*.mvb
+*.key
+bundle-geheim/
 
 # Daten, die tools/daten.py erzeugt — neu erzeugen, nicht einchecken.
 build/daten/
