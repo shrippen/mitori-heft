@@ -10,7 +10,7 @@
 -- Die Makros stehen in stil/shinki.sty.
 local M = {}
 
-M.daten = "../build/daten/"
+M.daten = "build/daten/"
 
 local cache = {}
 

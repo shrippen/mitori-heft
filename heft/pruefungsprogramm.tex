@@ -2,10 +2,8 @@
 %
 % Bauen: ./build.sh (Heft) bzw. ./build.sh entwurf (mit Fragen-Markern).
 % Alle Inhalte kommen aus mitori-daten/daten/*.yaml (über tools/daten.py); gesetzt von lua/mitori-heft.lua.
-% MITORI_DATEN_DIR in der Umgebung überschreibt den Pfad zum Daten-Repo
-% (das Build-Skript setzt ihn auf das Submodul mitori-daten/).
-\providecommand{\mitoridaten}{../mitori-daten/}
-\providecommand{\mitoridaten}{\MITORI_DATEN_DIR}
+% build.sh setzt \mitoridaten (Submodul, sonst MITORI_DATEN_DIR).
+\providecommand{\mitoridaten}{../mitori-daten}
 \documentclass[10pt]{article}
 \usepackage{stil/shinki}
 
