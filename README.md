@@ -28,7 +28,8 @@ git submodule update --init
 ./heft/build.sh entwurf        # → heft/build/pruefungsprogramm-entwurf.pdf (mit Fragen-Markern)
 ```
 
-Voraussetzungen: LuaLaTeX (TeX Live), Python 3 mit PyYAML.
+Voraussetzungen: LuaLaTeX (TeX Live), Noto Serif CJK, Python 3 mit PyYAML. Die Pakete stehen in
+`.github/workflows/checks.yml`.
 
 ## Lizenz
 

@@ -2,18 +2,10 @@ name: Checks
 
 # The checks of every commit:
 #   Daten im mitori-daten-Submodul: tools/daten.py + generierte YAMLs sind aktuell
-#   Heft baut: heft/build.sh → build/pruefungsprogramm.pdf (zwei PDFs: regulaer
-#     und der Entwurf mit Fragen-Marken, der sieht ob noch rote Marken drin sind)
-# LaTeX-Build mit Arch-Paketen ist der gleiche Container wie lokal.
+#   Heft baut: heft/build.sh → heft/build/pruefungsprogramm.pdf, und der Entwurf
+#     mit den Marken für offene Fragen
 #
-# Not in this CI (runs only locally):
-#   - ein PDF-Build mit den Original-Videos (gibt es nicht im Repo, nur lokal
-#     unter ../Mitori Videos)
-#   - die Release-PDFs selbst, die an den Verband gehen — die entstehen im
-#     Mitori-App-CI und werden von dort aus hochgeladen (mitori-heft wird
-#     nicht in der App-Workflows referenziert).
-#
-# Arch Linux container: texlive-most bringt LuaLaTeX mit japanischen Fonts.
+# Arch Linux container: the same TeX Live as on the developer machine.
 
 # Public mirror: Gitea pushes every branch and tag here on each commit.
 # This runs the checks and reports them back to the commit on Gitea as
@@ -52,44 +44,26 @@ jobs:
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
 
-      # Arch hat kein texlive-most mehr (es war ein Pflichter-Set); wir nehmen die
-      # einzelnen Pakete, die wir für das Heft brauchen: Kern + LaTeX + Japanisch +
-      # Schriften (PT Sans als OFL-Substitution, Noto für die Kanji).
+      # What the booklet reads (see build/*.fls): LuaLaTeX with fontspec and TikZ, Cochineal and
+      # Latin Modern as text faces, Noto Serif CJK for the Japanese. poppler-data: the data checks.
       - name: Install LuaLaTeX and Python
-        # texlive-basic bringt lualatex, texlive-binextra das latexmk (das seit
-        # 2026 nicht mehr in texlive-bin steckt).
         run: |
-          pacman -Syu --noconfirm --needed git python python-yaml python-pytest \
-            poppler poppler-data \
-            texlive-basic texlive-bin texlive-binextra texlive-latex texlive-latexextra \
-            texlive-fontsrecommended texlive-fontsextra texlive-fontutils \
-            texlive-langjapanese
+          pacman -Syu --noconfirm --needed git python python-yaml python-pytest python-pynacl \
+            poppler poppler-data noto-fonts-cjk otf-latin-modern \
+            texlive-basic texlive-bin texlive-binextra texlive-luatex texlive-latex \
+            texlive-latexrecommended texlive-latexextra texlive-pictures texlive-fontsextra
 
-      # The mitori-daten submodule at the root has the data, the tools and the
-      # Shinki style. actions/checkout cannot pull from git.arianw.de on GitHub's runner
-      # (no credentials for Gitea); clone it manually with the configured GITEA_TOKEN.
+      # The submodule URL is relative: here it resolves to the public mirror of mitori-daten.
       - uses: actions/checkout@v7
-
-      - name: Clone mitori-daten submodule
-        env:
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
-        run: |
-          set -euo pipefail
-          # git on GitHub's runners refuses to operate on paths it can't prove are safe
-          # (dubious ownership); mark each expected workspace as safe first.
-          git config --global --add safe.directory '*'
-          git submodule sync --recursive
-          # Pin the URL with the Gitea token so the submodule clone authenticates.
-          git config --global url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf "https://git.arianw.de/"
-          git submodule update --init --force --depth=1 --recursive
-          # Drop the credential from the working config so flat tests don't see it.
-          git config --local --unset url."https://oauth2:${GITEA_TOKEN}@git.arianw.de/".insteadOf 2>/dev/null || true
+        with:
+          submodules: recursive
 
       # The data the booklet sets lives in the submodule. Its own checks run
       # there as well — anything that breaks the data breaks the booklet
       # build, so the surface belongs here too.
       - name: Daten im Submodul
         run: |
+          git config --global --add safe.directory '*'
           cd mitori-daten
           python3 -m pytest -q tests
           python3 tools/daten.py
@@ -104,10 +78,7 @@ jobs:
       - name: Build the booklet
         run: bash heft/build.sh
 
-      # The booklet with question markers (\\mitorientwurf{}, marks for open
-      # questions). A red mark in the output PDF means an open question in
-      # KORREKTUREN.md (status "klären") is still in the data — the booklet
-      # must wait until Sensei/Lehrer das klären.
+      # The booklet with marks for the open questions of KORREKTUREN.md.
       - name: Build the draft (with question markers)
         run: bash heft/build.sh entwurf
 
