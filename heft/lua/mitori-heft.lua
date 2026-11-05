@@ -33,6 +33,10 @@ end
 
 -- Der Datenstand (STAND in mitori-daten) für den Titel
 function M.stand() out(esc(laden("stand"))) end
+-- Das Jahr dieses Datenstands, für die Titelzeile
+function M.standjahr() out(esc(laden("stand"):match("^%d+"))) end
+-- Der Stand einer Disziplin (`stand` in daten/<art>.yaml), für die Titelseite ihres Teils
+function M.standvon(art) out(esc(laden(art).stand)) end
 
 -- Kanji setzen: Daitoryu als Vorschlag (heller), sonst gesichert
 local function jp(d, k)
