@@ -8,7 +8,7 @@ mit LuaLaTeX. Eine Quelle der Daten liegt im Schwester-Repo `mitori-daten` (Subm
 ```
 heft/
   pruefungsprogramm.tex     Hauptdokument
-  stil/shinki.sty           LaTeX-Stil (Shinki-Bibel im Daten-Repo)
+  stil/shinki.sty           LaTeX-Stil (Shinki-Bibel in mitori-app)
   texte/hinweise.tex        allgemeine Hinweise
   grafik/shinki-logo.pdf    Titelgrafik
   schriften/                PT Sans (OFL); lizenzierter Schriftsatz
@@ -28,7 +28,8 @@ git submodule update --init
 ./heft/build.sh entwurf        # → heft/build/pruefungsprogramm-entwurf.pdf (mit Fragen-Markern)
 ```
 
-Voraussetzungen: LuaLaTeX (TeX Live), Python 3 mit PyYAML.
+Voraussetzungen: LuaLaTeX (TeX Live), Noto Serif CJK, Python 3 mit PyYAML. Die Pakete stehen in
+`.github/workflows/checks.yml`.
 
 ## Lizenz
 

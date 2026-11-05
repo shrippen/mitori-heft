@@ -10,7 +10,7 @@
 -- Die Makros stehen in stil/shinki.sty.
 local M = {}
 
-M.daten = "../build/daten/"
+M.daten = "build/daten/"
 
 local cache = {}
 
@@ -30,6 +30,9 @@ local function laden(art)
   if not cache[art] then cache[art] = dofile(M.daten .. art .. ".lua") end
   return cache[art]
 end
+
+-- Der Datenstand (STAND in mitori-daten) für den Titel
+function M.stand() out(esc(laden("stand"))) end
 
 -- Kanji setzen: Daitoryu als Vorschlag (heller), sonst gesichert
 local function jp(d, k)
