@@ -31,6 +31,9 @@ local function laden(art)
   return cache[art]
 end
 
+-- Der Datenstand (STAND in mitori-daten) für den Titel
+function M.stand() out(esc(laden("stand"))) end
+
 -- Kanji setzen: Daitoryu als Vorschlag (heller), sonst gesichert
 local function jp(d, k)
   if not k or k == "" then return "" end

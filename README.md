@@ -8,7 +8,7 @@ mit LuaLaTeX. Eine Quelle der Daten liegt im Schwester-Repo `mitori-daten` (Subm
 ```
 heft/
   pruefungsprogramm.tex     Hauptdokument
-  stil/shinki.sty           LaTeX-Stil (Shinki-Bibel im Daten-Repo)
+  stil/shinki.sty           LaTeX-Stil (Shinki-Bibel in mitori-app)
   texte/hinweise.tex        allgemeine Hinweise
   grafik/shinki-logo.pdf    Titelgrafik
   schriften/                PT Sans (OFL); lizenzierter Schriftsatz
