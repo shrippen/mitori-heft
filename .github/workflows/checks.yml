@@ -83,6 +83,10 @@ jobs:
           tagged=$(git ls-remote --tags origin "refs/tags/$tag" "refs/tags/$tag^{}" | tail -1 | cut -f1)
           [ "$tagged" = "$(git rev-parse HEAD)" ] || { echo "::error::mitori-daten is pinned to $(git rev-parse --short HEAD), not to its tag $tag"; exit 1; }
 
+      # Every date of the data comes from the data: a date typed into the title pages goes stale.
+      - name: No typed data state
+        run: "! grep -nE 'Stand [0-9]' heft/pruefungsprogramm.tex"
+
       # The booklet without question markers (the published one). latexmk
       # errors here mean the LaTeX or the data path is broken.
       - name: Build the booklet
